@@ -323,7 +323,6 @@ if ($method == "ADMINAPI") {
 				} else {
 					// 不存在数据库，需创建
 					$sql = "CREATE DATABASE `$dbname` character set utf8;"; // 查询是否有此数据库
-					$mysql_query = mysqli_query($conn, $sql);
 					if ($mysql_query) {
 						// 创建成功
 						EchoInfo(0, array("msg" => "成功连接并创建数据库 $dbname 。"));

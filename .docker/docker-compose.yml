@@ -1,0 +1,64 @@
+version: '2'
+services:
+  nginx:
+    container_name: ${SERVER_NAME}.nginx
+    build: nginx
+    environment: 
+      NGINX_SERVER_NAME: ${SERVER_NAME}
+      LETSENCRYPT: 'false'
+      HTTPS_ONLY: 'false'
+      NGINX_ROOT: ${NGINX_ROOT}
+      VIRTUAL_HOST: ${SERVER_NAME},www.${SERVER_NAME}
+      LETSENCRYPT_HOST: ${SERVER_NAME},www.${SERVER_NAME}
+      LETSENCRYPT_EMAIL: wenhua4438@gmail.com
+    volumes:
+      - ./nginx/default.crt:/srv/config/fullchain.pem
+      - ./nginx/default.key:/srv/config/privkey.pem
+      - ./nginx/access.log:/var/log/nginx/${SERVER_NAME}.default.log
+      - ./nginx/error.log:/var/log/nginx/${SERVER_NAME}.error.log
+      - /etc/hosts:/etc/hosts
+    volumes_from: 
+      - php
+    ports:
+      - '80:80'
+      - '443:443'
+  php:
+    build: php
+    container_name: ${SERVER_NAME}.php
+    volumes:
+      - /php
+      - ../:${WORKING_DIR}
+      - /run/mysqld
+      - ./php/php.log:/var/log/php.log
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/locale:/etc/default/locale
+    working_dir: ${WORKING_DIR}
+    links:
+      - mysql
+  
+  mysql:
+    container_name: ${SERVER_NAME}.mysql
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SERVER_NAME: ${SERVER_NAME}
+    expose: 
+      - '3306'
+    volumes:
+      - /run/mysqld
+      - ../:/srv/www
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - '3306:3306'
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+networks:
+  default:
+    external: false
+    name: ${SERVER_NAME}
