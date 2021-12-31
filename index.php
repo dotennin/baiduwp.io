@@ -1,4 +1,5 @@
 <?php
+require __DIR__.'/vendor/autoload.php';
 
 /**
  * PanDownload 网页复刻版，PHP 语言版主文件
@@ -144,11 +145,10 @@ Function
 	<div class="container">
 		<?php
 		if (DEBUG) {
-			echo '<pre>$_GET:';
-			var_dump($_GET);
+			echo '$_GET:';
+			dump($_GET);
 			echo '$_POST:';
-			var_dump($_POST);
-			echo '</pre>';
+			dump($_POST);
 		}
 		if (isset($_GET["help"])) { // 帮助页
 			echo Language["HelpPage"];
@@ -163,6 +163,11 @@ Function
 			$IsRoot = ($dir == "") ? true : false;
 			$surl = (!empty($dir)) ? "1" . $_POST["surl"] : $_POST["surl"]; // 含有1
 			$surl_1 = substr($surl, 1); //不含1
+			if (DEBUG) {
+				echo '<pre>';
+				dump($surl, $dir, $IsRoot, $pwd);
+				echo '</pre>';
+			}
 
 			if (WECHAT_MOD) {
 				$Filejson = GetList($surl, $dir, $IsRoot, $pwd); // 解析子目录时，需添加1

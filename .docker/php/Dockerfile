@@ -1,6 +1,6 @@
 FROM php:fpm
 
-RUN apt-get update && apt-get install -y
+RUN apt-get update && apt-get install -y wget git
 
 RUN docker-php-ext-install -j$(nproc) mysqli pdo_mysql
 # php-pear #
@@ -31,13 +31,4 @@ RUN { \
       echo php_admin_value[mysqli.default_socket] = /run/mysqld/mysqld.sock ;\
     } | tee /usr/local/etc/php-fpm.d/zz-docker.conf
 
-
-# RUN locale-gen en_US.UTF-8 && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
-
-# NOTE: make sure to chown your data folder to 33:33
-
-# RUN chmod -R 660 /srv/www
-# RUN chmod 777 /srv/www/pydio-core/data/files/
-# RUN chmod 777 /srv/www/pydio-core/data/personal/
-
-CMD php-fpm
+ENTRYPOINT /var/www/composer.phar install | php-fpm
