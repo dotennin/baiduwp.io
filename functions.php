@@ -39,7 +39,12 @@ function setCurl(&$ch, array $header)
 	return ($a && $b && $c && $d);
 }
 function post(string $url, $data, array $header)
-{ // POST 发送数据
+{ 
+	if (DEBUG) {
+		echo "post data(url, body, header):";
+		dump($url, $data, $header);
+	}
+	// POST 发送数据
 	$ch = curl_init($url);
 	setCurl($ch, $header);
 	curl_setopt($ch, CURLOPT_POST, true); // POST 方法
@@ -167,15 +172,14 @@ function getSign(string $surl, $randsk, $uk = "", $shareid = "")
 	if (preg_match('/locals.mset\((\{.*?\})\);/', $result, $matches)) {
 		$result_decode = json_decode($matches[1], true, 512, JSON_BIGINT_AS_STRING);
 		if (DEBUG) {
-			echo '<pre>【限制版】getSign():';
-			var_dump($result_decode);
-			echo '</pre>';
+			echo '【限制版】getSign():';
+			dump($result_decode);
 		}
 		return $result_decode;
 	} else {
 		if (DEBUG) {
-			echo '<pre>【限制版】getSign():no match</pre>';
-			var_dump(htmlspecialchars($result));
+			echo '【限制版】getSign():no match</pre>';
+			dump(htmlspecialchars($result));
 		}
 		if (strstr($result, "Redirecting to") != false) {
 			// 账号BDUSS或STOKEN失效
@@ -202,9 +206,8 @@ function GetDirRemote(string $dir, string $randsk, string $shareid, string $uk)
 	);
 	$result = json_decode(get($url, $header), true);
 	if (DEBUG) {
-		echo '<pre>GetDir():';
-		var_dump($result);
-		echo '</pre>';
+		echo 'GetDir():';
+		dump($result);
 	}
 	return $result;
 }
@@ -222,17 +225,16 @@ function getDlink(string $fs_id, string $timestamp, string $sign, string $randsk
 		$url = 'https://pan.baidu.com/api/sharedownload?app_id=' . $app_id . '&channel=chunlei&clienttype=12&sign=' . $sign . '&timestamp=' . $timestamp . '&web=1'; // 获取下载链接
 	}
 
-	$data = "encrypt=0" . "&extra=" . urlencode('{"sekey":"' . urldecode($randsk) . '"}') . "&fid_list=[$fs_id]" . "&primaryid=$share_id" . "&uk=$uk" . "&product=share&type=nolimit";
+	$data = "encrypt=0" . "&fid_list=[$fs_id]" . "&primaryid=$share_id" . "&uk=$uk" . "&product=share&type=nolimit";
 	$header = array(
 		"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.514.1919.810 Safari/537.36",
-		"Cookie: BDUSS=" . BDUSS . ";STOKEN=" . STOKEN . ";BDCLND=" . $randsk . ";",
+		"Cookie: BDUSS=" . BDUSS . ";STOKEN=" . STOKEN . ";",
 		"Referer: https://pan.baidu.com/disk/home"
 	);
 	$result = json_decode(post($url, $data, $header), true);
 	if (DEBUG) {
-		echo '<pre>getDlink():';
-		var_dump($result);
-		echo '</pre>';
+		echo 'getDlink():';
+		dump($result);
 	}
 	return $result;
 
@@ -279,16 +281,16 @@ function get_BDCLND($surl, $Pwd, $uk = "", $shareid = "")
 
 	if ($bdclnd) {
 		if (DEBUG) {
-			echo '<pre>get_BDCLND():';
-			var_dump($bdclnd);
-			echo '</pre>';
+			echo 'get_BDCLND():';
+			echo 'url:'; dump($url);
+			echo 'result:'; dump($result);
+			dump($bdclnd);
 		}
 		return $bdclnd;
 	} else {
 		if (DEBUG) {
-			echo '<pre>【获取bdclnd失败，可能是不需要此参数】get_BDCLND():';
-			var_dump($result);
-			echo '</pre>';
+			echo '获取bdclnd失败，可能是不需要此参数】get_BDCLND():';
+			dump($result);
 		}
 		if ($surl != "") {
 			echo '<script>Swal.fire("使用提示","检测到当前链接异常，保存到网盘重新分享后可获得更好的体验~","info");</script>';
@@ -305,16 +307,14 @@ function get_BDCLND($surl, $Pwd, $uk = "", $shareid = "")
 		$bdclnd = preg_match('/BDCLND=(.+?);/', $header, $matches);
 		if ($bdclnd) {
 			if (DEBUG) {
-				echo '<pre>【老版本方法】get_BDCLND():';
-				var_dump($matches[1]);
-				echo '</pre>';
+				echo '【老版本方法】get_BDCLND():';
+				dump($matches[1]);
 			}
 			return $matches[1];
 		} else {
 			if (DEBUG) {
-				echo '<pre>【老版本方法】get_BDCLND():';
-				var_dump($header);
-				echo '</pre>';
+				echo '【老版本方法】get_BDCLND():';
+				dump($header);
 			}
 			return '';
 		}
@@ -354,9 +354,8 @@ function GetList(string $Shorturl, string $Dir, bool $IsRoot, string $Password)
 	$header = array("User-Agent: netdisk", "Referer: https://pan.baidu.com/disk/home");
 	$result = json_decode(post($Url, $Data, $header), true);
 	if (DEBUG) {
-		echo '<pre>GetList():';
-		var_dump($result);
-		echo '</pre>';
+		echo 'GetList():';
+		dump($result);
 	}
 	return $result;
 }
@@ -603,9 +602,8 @@ function AccountStatus(string $BDUSS, string $STOKEN)
 	$Result = post($Url, $Data, $Header);
 	$Result = json_decode($Result, true);
 	if (DEBUG) {
-		echo '<pre>账号状态:';
-		var_dump($Result);
-		echo '</pre>';
+		echo '账号状态:';
+		dump($Result);
 	}
 	if ($Result["errno"] == 0) {
 		// 正常
@@ -629,9 +627,8 @@ function AccountStatus(string $BDUSS, string $STOKEN)
 		$Result = post($Url, $Data, $Header);
 		$Result = json_decode($Result, true);
 		if (DEBUG) {
-			echo '<pre>会员状态:';
-			var_dump($Result);
-			echo '</pre>';
+			echo '会员状态:';
+			dump($Result);
 		}
 		if (isset($Result["reminder"]["svip"])) {
 			//存在会员信息

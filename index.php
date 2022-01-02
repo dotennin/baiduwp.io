@@ -1,5 +1,4 @@
 <?php
-require __DIR__.'/vendor/autoload.php';
 
 /**
  * PanDownload 网页复刻版，PHP 语言版主文件
@@ -163,11 +162,6 @@ Function
 			$IsRoot = ($dir == "") ? true : false;
 			$surl = (!empty($dir)) ? "1" . $_POST["surl"] : $_POST["surl"]; // 含有1
 			$surl_1 = substr($surl, 1); //不含1
-			if (DEBUG) {
-				echo '<pre>';
-				dump($surl, $dir, $IsRoot, $pwd);
-				echo '</pre>';
-			}
 
 			if (WECHAT_MOD) {
 				$Filejson = GetList($surl, $dir, $IsRoot, $pwd); // 解析子目录时，需添加1
@@ -286,9 +280,8 @@ Function
 						$result = get($url, $header);
 						$result = json_decode($result, true, 512, JSON_BIGINT_AS_STRING);
 						if (DEBUG) {
-							echo '<pre>【限制版】根目录(sign,timestamp):';
-							var_dump($result);
-							echo '</pre>';
+							echo '【限制版】根目录(sign,timestamp):';
+							dump($result);
 						}
 						$sign = $result["data"]["sign"];
 						$timestamp = $result["data"]["timestamp"];
